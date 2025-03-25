@@ -1,0 +1,92 @@
+{
+  "name": "M3.1 - Função - Consultar Informações Banco de Dados",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "consulta-banco",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "915d2205-d126-4db2-96b8-ae570499f70c",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        80,
+        420
+      ],
+      "webhookId": "16af9df7-2759-4d2c-8455-950f794573e8"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "id": "998ed5bd-8bc1-4f29-bcc4-64eefccac05c",
+      "name": "Responder Dify",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        520,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "produtos",
+        "returnAll": true
+      },
+      "id": "c44093fd-054e-46f2-a9d3-8ee7b849fa58",
+      "name": "buscarProdutos",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        300,
+        420
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "q8fHAvRB8yZ0YcfK",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "buscarProdutos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscarProdutos": {
+      "main": [
+        [
+          {
+            "node": "Responder Dify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "36f27f83-fc41-433d-bba6-0850a1d2f3f5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "107b613a2a1a2b2ec55be12aa4987518e4e956275e1d3b131f347428d37ca35c"
+  },
+  "id": "lnMU6NW8cXR1tZKJ",
+  "tags": []
+}

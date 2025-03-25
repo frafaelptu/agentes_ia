@@ -1,0 +1,266 @@
+{
+  "name": "M3.2 - Função - Criar Link Pagamento Asaas",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sandbox.asaas.com/api/v3/customers",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "access_token",
+              "value": "[TOKEN DE ACESSO API]"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $json.query.nome }}"
+            },
+            {
+              "name": "cpfCnpj",
+              "value": "={{ $json.query.cpf }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0cd9285a-d286-4052-b12e-c2c6033a2dd9",
+      "name": "Asaas - Criar Cliente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $('Asaas - Criar Link de Checkout').item.json.invoiceUrl }}",
+        "options": {}
+      },
+      "id": "e390c48a-bb47-4bc6-949e-ea816fcaedac",
+      "name": "Responder Dify",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        940,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sandbox.asaas.com/api/v3/payments",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "access_token",
+              "value": "[TOKEN DE ACESSO API]"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "billingType",
+              "value": "PIX"
+            },
+            {
+              "name": "customer",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "name": "value",
+              "value": "={{ $('Webhook - Dify').item.json.query.valor }}"
+            },
+            {
+              "name": "dueDate",
+              "value": "2024-12-30"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9a34197d-dad4-4f7e-a897-a4ec21fb5602",
+      "name": "Asaas - Criar Link de Checkout",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        420,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "usuarios",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "userDify_id",
+              "keyValue": "={{ $('Webhook - Dify').item.json.query.userDify_id }}"
+            }
+          ]
+        }
+      },
+      "id": "39946e4f-5558-4022-835c-a1362ebe02fc",
+      "name": "Buscar Usuário",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        600,
+        440
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "q8fHAvRB8yZ0YcfK",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "pedidos",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "usuario_id",
+              "fieldValue": "={{ $json.usuario_id }}"
+            },
+            {
+              "fieldId": "produto_id",
+              "fieldValue": "={{ $('Webhook - Dify').item.json.query.produto_id }}"
+            },
+            {
+              "fieldId": "id_cobranca",
+              "fieldValue": "={{ $('Asaas - Criar Link de Checkout').item.json.id }}"
+            }
+          ]
+        }
+      },
+      "id": "03ab6ae9-7333-40c2-b76a-c5a1901ee847",
+      "name": "Criar Pedido",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        780,
+        440
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "q8fHAvRB8yZ0YcfK",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "pagamento",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "c53396a7-0e96-4a8f-b8d8-98a4c276e0cf",
+      "name": "Webhook - Dify",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        20,
+        440
+      ],
+      "webhookId": "82de2541-ea34-40d4-a747-07ca6594aea9"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Asaas - Criar Cliente": {
+      "main": [
+        [
+          {
+            "node": "Asaas - Criar Link de Checkout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Asaas - Criar Link de Checkout": {
+      "main": [
+        [
+          {
+            "node": "Buscar Usuário",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Usuário": {
+      "main": [
+        [
+          {
+            "node": "Criar Pedido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Pedido": {
+      "main": [
+        [
+          {
+            "node": "Responder Dify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Dify": {
+      "main": [
+        [
+          {
+            "node": "Asaas - Criar Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f596e60e-cf0f-4f2b-8e2f-52e346915572",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "107b613a2a1a2b2ec55be12aa4987518e4e956275e1d3b131f347428d37ca35c"
+  },
+  "id": "A5hxnSbg3IMjfhXU",
+  "tags": []
+}

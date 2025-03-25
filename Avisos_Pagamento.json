@@ -1,0 +1,83 @@
+{
+  "name": "Avisos Pagamento",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "pedidos_novo",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "cobranca_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.body.payment.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.body.payment.status }}"
+            }
+          ]
+        }
+      },
+      "id": "5768c244-34b1-4dfa-a0a6-9af31f69ccc0",
+      "name": "Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1060,
+        460
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "q8fHAvRB8yZ0YcfK",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "aviso-pagamento",
+        "options": {}
+      },
+      "id": "b2d87b1d-026c-4310-8d22-ef0fe07e2910",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        840,
+        460
+      ],
+      "webhookId": "e04efa56-a67a-4836-9b8a-672a5ef78576"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "63551fae-0342-4979-9ee0-3ff8614682cc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "107b613a2a1a2b2ec55be12aa4987518e4e956275e1d3b131f347428d37ca35c"
+  },
+  "id": "rQJBIoH2sjgGNJ9C",
+  "tags": []
+}

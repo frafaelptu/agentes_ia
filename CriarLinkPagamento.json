@@ -1,0 +1,410 @@
+{
+  "name": "CriarLinkPagamento",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "de649d7f-0c25-4557-90d7-d0d16bb0c476",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        520,
+        440
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "09c5c0a7-252e-4a7d-9a13-cd6bb820d68d",
+              "name": "name",
+              "value": "Matheus",
+              "type": "string"
+            },
+            {
+              "id": "b91e7d1b-5ce2-4d87-b32b-ef5f53ce5024",
+              "name": "cpfCnpj",
+              "value": "834.030.110-11",
+              "type": "string"
+            },
+            {
+              "id": "a8482f74-0ab1-4f66-bd2c-674bdc655c42",
+              "name": "email",
+              "value": "castelo@nocodestartup.io",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0db1153e-563c-4786-bdbc-b498aebae483",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        680,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sandbox.asaas.com/api/v3/customers",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "access_token",
+              "value": "$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAwODA0NjA6OiRhYWNoXzI4M2YzNmM3LTQ4MzctNDg2Yy05MThkLTQ5NTdkYWQxNDI5OA=="
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $json.name }}"
+            },
+            {
+              "name": "cpfCnpj",
+              "value": "={{ $json.cpfCnpj }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $json.email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fb8bf6f6-9ed2-4390-9036-6a23cfbdaea3",
+      "name": "Asaas API - Criar Cliente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        840,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sandbox.asaas.com/api/v3/payments",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "access_token",
+              "value": "$aact_YTU5YTE0M2M2N2I4MTliNzk0YTI5N2U5MzdjNWZmNDQ6OjAwMDAwMDAwMDAwMDAwODA0NjA6OiRhYWNoXzI4M2YzNmM3LTQ4MzctNDg2Yy05MThkLTQ5NTdkYWQxNDI5OA=="
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "billingType",
+              "value": "PIX"
+            },
+            {
+              "name": "value",
+              "value": 500
+            },
+            {
+              "name": "dueDate",
+              "value": "2024-12-31"
+            },
+            {
+              "name": "customer",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4a1cf868-675c-41c2-831e-f95dadf2e85a",
+      "name": "Asaas API - Gerar Cobrança",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1020,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "usuarios_novo",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "cpf",
+              "keyValue": "={{ $('Edit Fields').item.json.cpfCnpj }}"
+            }
+          ]
+        }
+      },
+      "id": "e638c103-0be2-449e-8e9e-feeade1d8b09",
+      "name": "Buscar Usuário",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        440
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "q8fHAvRB8yZ0YcfK",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "142b0838-2d26-4c11-bb5e-009a392b27be",
+              "leftValue": "={{ $json.user_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "af4cda0e-73be-4c31-aa10-d8ada2435c75",
+      "name": "Usuário Existe?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1340,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "pedidos_novo",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $('Buscar Usuário').item.json.user_id }}"
+            },
+            {
+              "fieldId": "valor",
+              "fieldValue": "={{ $('Asaas API - Gerar Cobrança').item.json.value }}"
+            },
+            {
+              "fieldId": "cobranca_id",
+              "fieldValue": "={{ $('Asaas API - Gerar Cobrança').item.json.id }}"
+            }
+          ]
+        }
+      },
+      "id": "04a2f28c-4ffc-483c-aee0-b3c75d287c49",
+      "name": "Criar um Pedido",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1740,
+        340
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "q8fHAvRB8yZ0YcfK",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "usuarios_novo",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $('Edit Fields').item.json.name }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $('Edit Fields').item.json.email }}"
+            },
+            {
+              "fieldId": "cpf",
+              "fieldValue": "={{ $('Edit Fields').item.json.cpfCnpj }}"
+            }
+          ]
+        }
+      },
+      "id": "a1c5975d-15e1-4d8a-b813-95cf32aec249",
+      "name": "Criar usuário",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1580,
+        580
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "q8fHAvRB8yZ0YcfK",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "pedidos_novo",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $json.user_id }}"
+            },
+            {
+              "fieldId": "valor",
+              "fieldValue": "={{ $('Asaas API - Gerar Cobrança').item.json.value }}"
+            },
+            {
+              "fieldId": "cobranca_id",
+              "fieldValue": "={{ $('Asaas API - Gerar Cobrança').item.json.id }}"
+            }
+          ]
+        }
+      },
+      "id": "6f89c9f3-4df7-4cf8-a59f-b5712e9e54ff",
+      "name": "Criar um Pedido1",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1740,
+        580
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "q8fHAvRB8yZ0YcfK",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Asaas API - Criar Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Asaas API - Criar Cliente": {
+      "main": [
+        [
+          {
+            "node": "Asaas API - Gerar Cobrança",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Asaas API - Gerar Cobrança": {
+      "main": [
+        [
+          {
+            "node": "Buscar Usuário",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Usuário": {
+      "main": [
+        [
+          {
+            "node": "Usuário Existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Usuário Existe?": {
+      "main": [
+        [
+          {
+            "node": "Criar um Pedido",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Criar usuário",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar usuário": {
+      "main": [
+        [
+          {
+            "node": "Criar um Pedido1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "430e5e7c-9e2e-4a29-8e97-73711196c6c4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "107b613a2a1a2b2ec55be12aa4987518e4e956275e1d3b131f347428d37ca35c"
+  },
+  "id": "t5EjT0ZGRTYhyODj",
+  "tags": []
+}

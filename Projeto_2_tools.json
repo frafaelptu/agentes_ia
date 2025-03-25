@@ -1,0 +1,244 @@
+{
+  "name": "Projeto 2 tools",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ed178ea2-44e5-4464-94ec-92f1e24d525c",
+      "name": "When chat message received",
+      "webhookId": "f53e2ca4-2519-448a-8b7e-45b69316abc2"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=Você é um assistente financeiro capaz de gerenciar registros de gastos no Supabase. Sua função é interagir com a tabela gastos, ajudando o usuário a visualizar adicionar e editar suas despesas.\n\nSempre que o usuário solicitar, ative a tool:\n\n1️⃣ Visualizar Gastos (tool_visualizar_gastos)\n\t•\tExiba os registros da tabela com nome, tipo e valor.\n\t•\tSe o usuário quiser filtrar por tipo ou período, pergunte os critérios antes de chamar a tool.\n\n2️⃣ Adicionar Gasto (tool_criar_gasto)\nPara ativar a tool é necessário ter:\n- nome_gasto (nome do gasto);\n- valor_gasto (valor do gasto);\n- tipo_gasto (Você deve categorizar tipo com base na mensagem do usuário, existem apenas 4 tipos de gastos: Supermercado, Diversão, Saúde e Educação)\nConfirme o registro antes de enviá-lo.\n\n3️⃣ Editar Gasto (tool_atualizar_gasto), siga o passo a passo:\n- Pergunte qual registro editar (nome).\n- Para isso ative a tool visualizar gasto para confirmar o nome exato do gasto\n- Confirme com o usuário qual gasto ele irá atualizar\n- Com o nome_gasto do gasto, ative a tool_atualizar_gasto e faça a alteração\n- Após a edição, mostre a atualização feita.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        220,
+        0
+      ],
+      "id": "e1df97e8-0d1a-4688-9425-c599cd7597d2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        240
+      ],
+      "id": "51e09e5b-782c-4a87-b139-5261e3116d41",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "gHExaNOwW8UfAm3l",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        280,
+        240
+      ],
+      "id": "7f84372c-43a8-435a-97a0-b0e060f5d646",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "gastos",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        440,
+        240
+      ],
+      "id": "4bf75db2-5415-460e-89f4-2b097a514b3a",
+      "name": "tool_visualizar_gastos",
+      "credentials": {
+        "supabaseApi": {
+          "id": "oaNAKkK2qXHzd9QY",
+          "name": "Supabase RAG project"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "gastos",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $fromAI('nome_gasto') }}"
+            },
+            {
+              "fieldId": "valor",
+              "fieldValue": "={{ $fromAI('valor_gasto') }}"
+            },
+            {
+              "fieldId": "tipo",
+              "fieldValue": "={{ $fromAI('tipo_gasto') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        600,
+        240
+      ],
+      "id": "dfd70aee-8ccd-4114-9d88-05d20f0f58e7",
+      "name": "tool_criar_gasto",
+      "credentials": {
+        "supabaseApi": {
+          "id": "oaNAKkK2qXHzd9QY",
+          "name": "Supabase RAG project"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "gastos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "nome",
+              "condition": "eq",
+              "keyValue": "={{ $fromAI('nome_gasto') }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $fromAI('nome_gasto') }}"
+            },
+            {
+              "fieldId": "valor",
+              "fieldValue": "={{ $fromAI('valor_gasto') }}"
+            },
+            {
+              "fieldId": "tipo",
+              "fieldValue": "={{ $fromAI('tipo_gasto') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        760,
+        240
+      ],
+      "id": "531892a0-fbcf-4bf5-bfb4-7924a8b141a5",
+      "name": "tool_atualizar_gasto",
+      "credentials": {
+        "supabaseApi": {
+          "id": "oaNAKkK2qXHzd9QY",
+          "name": "Supabase RAG project"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "tool_visualizar_gastos": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "tool_criar_gasto": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "tool_atualizar_gasto": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8a71115f-925e-4309-80b8-f407fb5f855d",
+  "meta": {
+    "instanceId": "107b613a2a1a2b2ec55be12aa4987518e4e956275e1d3b131f347428d37ca35c"
+  },
+  "id": "cxtld5oC6HEW4Gzm",
+  "tags": []
+}

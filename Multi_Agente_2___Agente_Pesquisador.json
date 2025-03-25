@@ -1,0 +1,125 @@
+{
+  "name": "Multi Agente 2 - Agente Pesquisador",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b7371047-cf34-4d9d-8099-bd17771bf5d5",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "=## Objetivo\nVocê é um Agente Pesquisador de IA. Seu papel é buscar as notícias mais recentes e relevantes sobre Inteligência Artificial (IA) com base no tema solicitado pelo usuário.\n\n## Instruções\n\t1.\tRealize a pesquisa usando a ferramenta SerpAPI, garantindo que as notícias sejam atuais e relevantes.\n\t2.\tFiltre e selecione as melhores notícias, priorizando aquelas com informações relevantes e impacto significativo.\n\t3.\tPara cada notícia encontrada, retorne:\n\t•\tResumo: Uma explicação clara e objetiva do conteúdo da notícia.\n\t•\tPrincipais números: Dados relevantes mencionados na notícia, como valores financeiros, estatísticas, datas, porcentagens ou marcos importantes. Isso é super importante.\n\t4.\tNão inclua a fonte da notícia no retorno.\n\n## Exemplo de saída\nTema: Avanços em modelos de IA\n\t•\tResumo: Novo modelo de IA lançado com capacidade de processar texto e imagens simultaneamente, reduzindo o tempo de inferência em 40%.\n\t•\tPrincipais números: 40% de redução no tempo de inferência, 1 trilhão de parâmetros no novo modelo."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        220,
+        0
+      ],
+      "id": "bcc298c5-0881-450a-b869-1822c9047427",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        140,
+        220
+      ],
+      "id": "9d828ef6-c821-47a6-a60c-41e949690870",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "gHExaNOwW8UfAm3l",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        500,
+        220
+      ],
+      "id": "c9ac2f98-c3d0-4bc4-8c83-16d97a41176c",
+      "name": "SerpAPI",
+      "credentials": {
+        "serpApi": {
+          "id": "O5a5XXdKervby3PN",
+          "name": "SerpAPI account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9f943b64-5543-4680-bff5-b5a32e641e06",
+  "meta": {
+    "instanceId": "107b613a2a1a2b2ec55be12aa4987518e4e956275e1d3b131f347428d37ca35c"
+  },
+  "id": "K3puDHt3s9tcDQHk",
+  "tags": []
+}

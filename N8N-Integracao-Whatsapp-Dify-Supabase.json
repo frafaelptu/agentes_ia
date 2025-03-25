@@ -1,0 +1,562 @@
+{
+  "name": "M1 - Integração Oficial WhatsApp + Supabase",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3CCB76D5C423A0191FA39E692ED0BBB5/token/2FEBF455B542CA12B231414C/send-text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Client-Token",
+              "value": " [TOKEN SEGURANÇA]"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $('Infos Manuais').item.json.celular }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.answer }}"
+            },
+            {
+              "name": "delayTyping",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a5175817-defa-4a52-983f-84b3607d5d1e",
+      "name": "ChamadaAPI - ZAPI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1980,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "66f4413d-7bf1-4408-a5b5-cfaafa472cea",
+              "leftValue": "={{ $json.usuario_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "770d64bd-3c03-49be-ba88-e73b3d9bad3c",
+      "name": "Usuário Existe?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "usuarios",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "celular",
+              "keyValue": "={{ $json.celular }}"
+            }
+          ]
+        }
+      },
+      "id": "13e19cf9-dcd6-4079-aaca-4979a6e32d8c",
+      "name": "Puxar Usuário",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1220,
+        420
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "q8fHAvRB8yZ0YcfK",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "usuarios",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $('Infos Manuais').item.json.nome }}"
+            },
+            {
+              "fieldId": "celular",
+              "fieldValue": "={{ $('Infos Manuais').item.json.celular }}"
+            },
+            {
+              "fieldId": "conversaDify_id",
+              "fieldValue": "={{ $json.conversation_id }}"
+            }
+          ]
+        }
+      },
+      "id": "eea55bcf-3d0c-4914-a8cf-c325d91aa991",
+      "name": "Criar Usuário",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1800,
+        540
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "q8fHAvRB8yZ0YcfK",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.dify.ai/v1/chat-messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer [API_KEY]"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "inputs"
+            },
+            {
+              "name": "query",
+              "value": "={{ $('Infos Manuais').item.json.Mensagem }}"
+            },
+            {
+              "name": "response_mode",
+              "value": "blocking"
+            },
+            {
+              "name": "conversation_id",
+              "value": "={{ $('Puxar Usuário').item.json.conversaDify_id }}"
+            },
+            {
+              "name": "user",
+              "value": "={{ $('Puxar Usuário').item.json.celular }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bc4cc15d-ff2a-40cb-b1f2-256bb7d171ef",
+      "name": "Dify - Executar Agente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1620,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c27dab1e-3cf4-41cf-8d23-7bbe466321b2",
+              "name": "nome",
+              "value": "={{ $json.body.chatName }}",
+              "type": "string"
+            },
+            {
+              "id": "33eeee7e-8a30-487a-b15b-a1a2a9181fdd",
+              "name": "celular",
+              "value": "={{ $json.body.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "7ce5fcad-d59b-489f-b526-6fee81a70128",
+              "name": "Mensagem",
+              "value": "={{ $json.body.text.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b58f13fe-8501-482c-8b9a-33098226d64f",
+      "name": "Infos Manuais",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1040,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.dify.ai/v1/chat-messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer  [API_KEY]"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "inputs"
+            },
+            {
+              "name": "query",
+              "value": "={{ $('Infos Manuais').item.json.Mensagem }}"
+            },
+            {
+              "name": "response_mode",
+              "value": "blocking"
+            },
+            {
+              "name": "conversation_id",
+              "value": "="
+            },
+            {
+              "name": "user",
+              "value": "={{ $('Infos Manuais').item.json.celular }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "96c79d40-161c-436d-bfd8-d0cf189d44d4",
+      "name": "Dify |Criar Conversa + Executa Agente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1620,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3CCB76D5C423A0191FA39E692ED0BBB5/token/2FEBF455B542CA12B231414C/send-text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Client-Token",
+              "value": " [TOKEN SEGURANÇA]"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $('Infos Manuais').item.json.celular }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $('Dify |Criar Conversa + Executa Agente').item.json.answer }}"
+            },
+            {
+              "name": "delayTyping",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c37c4372-b71e-47e3-ba35-0c3eecffe90a",
+      "name": "ChamadaAPI - ZAPI1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1980,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "b069f56f-123a-436b-aaab-9c9b7ba7693f",
+              "leftValue": "={{ $json.body.isGroup }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "9590e7cf-f8ab-4314-92be-b033f68b58b4",
+              "leftValue": "={{ $json.body.fromMe }}",
+              "rightValue": "554899260823",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7266ccf2-6a59-4f13-930a-5f583ff6a1ce",
+      "name": "Verificar Condições",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        840,
+        540
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "d770d0f3-6959-4f41-9a52-6a60a182df73",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "msgwhats",
+        "options": {}
+      },
+      "id": "c1711852-3ddf-4882-8b83-bd81fb4603b5",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        680,
+        540
+      ],
+      "webhookId": "4d10e98e-9231-4076-a50f-0421cc8e9e74"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "primary-production-ecd5.up.railway.app",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54",
+            "content-length": "735",
+            "content-type": "application/json",
+            "origin": "https://api.z-api.io",
+            "server": "Z-API",
+            "x-forwarded-for": "146.235.50.46",
+            "x-forwarded-host": "primary-production-ecd5.up.railway.app",
+            "x-forwarded-proto": "https",
+            "x-real-ip": "146.235.50.46",
+            "x-request-id": "gYg-RPJNRKiQ6BXH6yp-QA_1654200396",
+            "z-api-token": "2FEBF455B542CA12B231414C",
+            "accept-encoding": "gzip"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "isStatusReply": false,
+            "chatLid": "48554773074107@lid",
+            "connectedPhone": "554899260823",
+            "waitingMessage": false,
+            "isEdit": false,
+            "isGroup": false,
+            "isNewsletter": false,
+            "instanceId": "3CCB76D5C423A0191FA39E692ED0BBB5",
+            "messageId": "3A682E8F8239820E3625",
+            "phone": "554896090559",
+            "fromMe": false,
+            "momment": 1724953217978,
+            "status": "RECEIVED",
+            "chatName": "Matheus Castelo",
+            "senderPhoto": null,
+            "senderName": "Matheus Castelo",
+            "photo": "https://pps.whatsapp.net/v/t61.24694-24/442235034_480859661353656_2396526361286468026_n.jpg?ccb=11-4&oh=01_Q5AaIPQ7jdp4E5bQcdbHE7TsnJMBQIdJLKVBo3Govifmzj4w&oe=66DDBF47&_nc_sid=5e03e0&_nc_cat=107",
+            "broadcast": false,
+            "participantLid": null,
+            "forwarded": false,
+            "type": "ReceivedCallback",
+            "fromApi": false,
+            "text": {
+              "message": "Oii"
+            }
+          },
+          "webhookUrl": "https://primary-production-ecd5.up.railway.app/webhook-test/msgwhats",
+          "executionMode": "test"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Usuário Existe?": {
+      "main": [
+        [
+          {
+            "node": "Dify - Executar Agente",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dify |Criar Conversa + Executa Agente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Puxar Usuário": {
+      "main": [
+        [
+          {
+            "node": "Usuário Existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dify - Executar Agente": {
+      "main": [
+        [
+          {
+            "node": "ChamadaAPI - ZAPI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Infos Manuais": {
+      "main": [
+        [
+          {
+            "node": "Puxar Usuário",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dify |Criar Conversa + Executa Agente": {
+      "main": [
+        [
+          {
+            "node": "Criar Usuário",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Usuário": {
+      "main": [
+        [
+          {
+            "node": "ChamadaAPI - ZAPI1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Condições": {
+      "main": [
+        [
+          {
+            "node": "Infos Manuais",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Verificar Condições",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d12b687c-973a-4b1b-a1e2-379d99fd8d5a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "107b613a2a1a2b2ec55be12aa4987518e4e956275e1d3b131f347428d37ca35c"
+  },
+  "id": "sVRhCb1h0xEbQHf2",
+  "tags": []
+}

@@ -1,0 +1,528 @@
+{
+  "name": "[F. Assistants] Case 1. Agente WhatsApp (S/ Thread)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "b2a502a6-e844-444b-82ca-8c1cf545cc71",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2400,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "69f6217f-9063-423f-abf4-e94f6b70f94e",
+              "name": "ClienteNome",
+              "value": "={{ $('Webhook').item.json.body.senderName }}",
+              "type": "string"
+            },
+            {
+              "id": "9f488c5c-0b3b-48e9-87b1-5a22d513d1ec",
+              "name": "ClienteTelefone",
+              "value": "={{ $('Webhook').item.json.body.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "1ae1a51c-00cb-47f9-8dc8-5a05c66fc0c8",
+              "name": "Mensagem",
+              "value": "={{ $json.body.text.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": "=",
+        "options": {}
+      },
+      "id": "fdb1479b-1eb1-4d2d-b20f-12126a121e0f",
+      "name": "Simplificação de Dados",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        780,
+        600
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "b5eadf6c-00e1-4a4b-9415-bd7c41e11ca9",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1500,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "assistant",
+        "assistantId": {
+          "__rl": true,
+          "value": "asst_qJeJcVhwN7FtnsC3f8BwkXAB",
+          "mode": "list",
+          "cachedResultName": "AI Agent Suporte Simples Integrado ao WhatsApp"
+        },
+        "prompt": "define",
+        "text": "={{ $('Simplificação de Dados').item.json.Mensagem }}",
+        "options": {}
+      },
+      "id": "4c93182e-fe84-414e-96b0-7b1b36205b6d",
+      "name": "OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        1780,
+        600
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "zK1bsB4i4ETFQdEq",
+          "name": "OpenAI NoCode StartUp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.ClienteTelefone }}"
+      },
+      "id": "158539c7-630b-4966-9198-5a80a4bb03a5",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [
+        1880,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "24aa4532-80db-4c1e-977a-0036b82a8e5f",
+              "leftValue": "={{ $json.body.isEdit }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "204f54b0-e3ed-4ff4-8302-8c20d3b8aa78",
+              "leftValue": "={{ $json.body.isGroup }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "130cc493-a17a-4cc1-955b-816799583076",
+              "leftValue": "={{ $json.body.isNewsletter }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c51986d9-f347-4198-89bb-9e4cd0f021c9",
+              "leftValue": "={{ $json.body.broadcast }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6cb9107c-b351-467c-b76c-4b3e802df182",
+      "name": "Filtro Inicial",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.1,
+      "position": [
+        600,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "3419c30f-4400-401b-bf40-db1579507f96",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f0b997c8-d8d6-444f-b348-86499850c5c8",
+      "name": "Usuário Existe?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.1,
+      "position": [
+        1140,
+        600
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "tableId": "clientes",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "ClienteNome",
+              "fieldValue": "={{ $('Simplificação de Dados').item.json.ClienteNome }}"
+            },
+            {
+              "fieldId": "ClienteTelefone",
+              "fieldValue": "={{ $('Simplificação de Dados').item.json.ClienteTelefone }}"
+            }
+          ]
+        }
+      },
+      "id": "32a695f6-319a-47bf-9cca-c588572da1e9",
+      "name": "Criar Cliente",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        700
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "c3ppibhd1RX2rXji",
+          "name": "Supabase Neto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "clientes",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "ClienteTelefone",
+              "keyValue": "={{ $json.ClienteTelefone }}"
+            }
+          ]
+        }
+      },
+      "id": "8c568a9a-ffbf-4117-be65-8b67b94482bc",
+      "name": "Buscar Cliente",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        960,
+        600
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "c3ppibhd1RX2rXji",
+          "name": "Supabase Neto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3CCB76D5C423A0191FA39E692ED0BBB5/token/2FEBF455B542CA12B231414C/send-text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "client-token",
+              "value": "Fb3f12b4499a34dcca77b302baf4f69dfS"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $('Simplificação de Dados').item.json.ClienteTelefone }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d133bf12-2db8-4507-95b2-b411b215ef4a",
+      "name": "(Z-API) Enviar Mensagem",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2220,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Gatilho\n",
+        "height": 240.85144562726154,
+        "width": 249.32862272687936
+      },
+      "id": "216755ab-ec27-4e19-b9fe-e4c8b70ab2d7",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Agente IA",
+        "height": 393.8583684351766,
+        "width": 380.9131897857398,
+        "color": 5
+      },
+      "id": "c5679d14-fea8-4999-8010-3a4f65cbed2c",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1700,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Respondendo WhatsApp",
+        "height": 309.31494265840024,
+        "width": 516.3150295612463,
+        "color": 7
+      },
+      "id": "597e21d4-79e6-4373-8122-072df5924cb6",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2120,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "7ea0962f-c046-4a40-80e7-6f278704f83e",
+        "options": {}
+      },
+      "id": "d8e6065f-968a-45ac-a14e-135ec9da5fa5",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        320,
+        600
+      ],
+      "webhookId": "7ea0962f-c046-4a40-80e7-6f278704f83e"
+    },
+    {
+      "parameters": {
+        "content": "## Gestão de usuários e conversas\n",
+        "height": 359.00376397853233,
+        "width": 1112.3260101675637,
+        "color": 4
+      },
+      "id": "b07991b0-637c-4d56-8a3a-4247855531f8",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        540,
+        520
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Simplificação de Dados": {
+      "main": [
+        [
+          {
+            "node": "Buscar Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "(Z-API) Enviar Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtro Inicial": {
+      "main": [
+        [
+          {
+            "node": "Simplificação de Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Usuário Existe?": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Criar Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Cliente": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Buscar Cliente": {
+      "main": [
+        [
+          {
+            "node": "Usuário Existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "(Z-API) Enviar Mensagem": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Filtro Inicial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c9071d85-ba76-444a-bb89-f3dabe0b4c77",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c2cf0571d78da189c5916e815dd57e9fc54736be5196d86f4402a03a1245164c"
+  },
+  "id": "maXIQKUr2NiYKZ6g",
+  "tags": [
+    {
+      "createdAt": "2024-09-14T16:51:28.535Z",
+      "updatedAt": "2024-09-14T16:51:28.535Z",
+      "id": "690f47PmWdvT1q1Y",
+      "name": "NoCode StartUp"
+    },
+    {
+      "createdAt": "2024-09-14T16:51:47.760Z",
+      "updatedAt": "2024-09-14T16:52:03.399Z",
+      "id": "7GTx0OddOX0WQ0KK",
+      "name": "Formação Assistants"
+    },
+    {
+      "createdAt": "2024-09-14T16:52:10.741Z",
+      "updatedAt": "2024-09-14T16:52:10.741Z",
+      "id": "8kSxs5DUMNDEnge2",
+      "name": "Modelo"
+    }
+  ]
+}

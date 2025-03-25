@@ -1,0 +1,885 @@
+{
+  "name": "[F. Assistants] Case 2. Agente WhatsApp (C/ Thread)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "032d142e-8ec7-4b4f-9b9b-d89f380632c1",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3480,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "69f6217f-9063-423f-abf4-e94f6b70f94e",
+              "name": "ClienteNome",
+              "value": "={{ $('Webhook').item.json.body.senderName }}",
+              "type": "string"
+            },
+            {
+              "id": "9f488c5c-0b3b-48e9-87b1-5a22d513d1ec",
+              "name": "ClienteTelefone",
+              "value": "={{ $('Webhook').item.json.body.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "1ae1a51c-00cb-47f9-8dc8-5a05c66fc0c8",
+              "name": "Mensagem",
+              "value": "={{ $json.body.text.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": "=",
+        "options": {}
+      },
+      "id": "78770d72-ca97-4adf-9485-478a12027593",
+      "name": "Simplificação de Dados",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        820,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "24aa4532-80db-4c1e-977a-0036b82a8e5f",
+              "leftValue": "={{ $json.body.isEdit }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "204f54b0-e3ed-4ff4-8302-8c20d3b8aa78",
+              "leftValue": "={{ $json.body.isGroup }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "130cc493-a17a-4cc1-955b-816799583076",
+              "leftValue": "={{ $json.body.isNewsletter }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c51986d9-f347-4198-89bb-9e4cd0f021c9",
+              "leftValue": "={{ $json.body.broadcast }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "92913866-eeb5-492a-b7e2-5327f789e894",
+              "leftValue": "={{ $json.body.fromApi }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "33f605bc-7a46-45b2-889a-bf4a3d98525b",
+      "name": "Filtro Inicial",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.1,
+      "position": [
+        640,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "usuarios",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "whatsapp",
+              "keyValue": "={{ $json.ClienteTelefone }}"
+            }
+          ]
+        }
+      },
+      "id": "fca1c5f8-b66c-4fac-9bc0-424c6f58bda0",
+      "name": "Buscar Cliente",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        600
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "c3ppibhd1RX2rXji",
+          "name": "Supabase Neto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "3419c30f-4400-401b-bf40-db1579507f96",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "98c3f957-95ed-436a-99b5-5c362d04607f",
+      "name": "Cliente Existe?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.1,
+      "position": [
+        1160,
+        600
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "tableId": "usuarios",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $('Simplificação de Dados').item.json.ClienteNome }}"
+            },
+            {
+              "fieldId": "whatsapp",
+              "fieldValue": "={{ $('Simplificação de Dados').item.json.ClienteTelefone }}"
+            },
+            {
+              "fieldId": "thread_id",
+              "fieldValue": "={{ $json.id }}"
+            }
+          ]
+        }
+      },
+      "id": "7cccac38-2b7c-433b-849e-0de662a0fa7b",
+      "name": "Criar Cliente",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        700
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "c3ppibhd1RX2rXji",
+          "name": "Supabase Neto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3CCB76D5C423A0191FA39E692ED0BBB5/token/2FEBF455B542CA12B231414C/send-text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $('Simplificação de Dados').item.json.ClienteTelefone }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.data[0].content[0].text.value }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f2ed707c-f526-4fb7-84a8-b2ac429ff4d1",
+      "name": "(Z-API) Enviar Mensagem",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3300,
+        600
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "18ZooK5mNEEU3JoS",
+          "name": "Z-API Security Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/threads",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "OpenAI-Beta",
+              "value": "assistants=v2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e179718a-3267-49fd-9d0b-276d72d25b64",
+      "name": "[OpenAI] Criar Thread",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1340,
+        700
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "zK1bsB4i4ETFQdEq",
+          "name": "OpenAI NoCode StartUp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.openai.com/v1/threads/{{ $json.thread_id }}/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "OpenAI-Beta",
+              "value": "assistants=v2"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "role",
+              "value": "user"
+            },
+            {
+              "name": "content",
+              "value": "={{ $('Simplificação de Dados').item.json.Mensagem }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9f438db7-0933-4e50-ad7c-863ff31096a0",
+      "name": "[OpenAI] Adicionar Mensagem na Thread",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1940,
+        600
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "zK1bsB4i4ETFQdEq",
+          "name": "OpenAI NoCode StartUp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.openai.com/v1/threads/{{ $json.thread_id }}/runs",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "OpenAI-Beta",
+              "value": "assistants=v2"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "assistant_id",
+              "value": "asst_c7vvzrc8JUupUiBCDbKL8PM6"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a77ea28e-6650-43f6-baf1-2da0618e1d1d",
+      "name": "[OpenAI] Criar Run",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2120,
+        600
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "zK1bsB4i4ETFQdEq",
+          "name": "OpenAI NoCode StartUp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "errorMessage": "Algum erro na execução na Run"
+      },
+      "id": "6e660a05-8ae5-478e-98c1-e7662c3e3933",
+      "name": "Stop and Error",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        2960,
+        780
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "67ef4e7e-7cf4-4c76-ac1c-8bdc06c1ece6",
+      "name": "No Operation, do nothing1",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2959,
+        426
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.openai.com/v1/threads/{{ $('[OpenAI] Buscar Status da Run').item.json.thread_id }}/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "OpenAI-Beta",
+              "value": "assistants=v2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f964467c-090b-480f-8cee-3b772e052448",
+      "name": "[OpenAI] Listar Mensagens Thread",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2960,
+        600
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "zK1bsB4i4ETFQdEq",
+          "name": "OpenAI NoCode StartUp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "d0132960-a69b-46f0-ab2b-7fe3b67c965d",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "requires_action",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "requires_action"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "a8e31c39-770b-47f4-9d72-62ba8cd3ed96",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "completed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "completed"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "9c3456a0-d550-4b1e-9eea-8e620c31b2f2",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "in_progress",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "in_progress"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "error"
+        }
+      },
+      "id": "db0e95c5-5a5f-4661-86ab-b17efabe9bc3",
+      "name": "Qual o status da Run?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.1,
+      "position": [
+        2680,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.openai.com/v1/threads/{{ $json.thread_id }}/runs/{{ $json.id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "OpenAI-Beta",
+              "value": "assistants=v2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3d38c4d0-b1d3-4533-be79-abcb32aaa703",
+      "name": "[OpenAI] Buscar Status da Run",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2480,
+        600
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "zK1bsB4i4ETFQdEq",
+          "name": "OpenAI NoCode StartUp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "id": "1bbb2dee-df74-44fa-9927-df28ebe479c1",
+      "name": "Espera 3 seg",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2300,
+        600
+      ],
+      "webhookId": "18b680d1-62b5-422c-ab9a-07b7bbde364e"
+    },
+    {
+      "parameters": {
+        "content": "## Gatilho\n",
+        "height": 211.6721022398889,
+        "width": 199.45909749221244
+      },
+      "id": "cbc774f7-07c4-4b55-9522-790b4a653bdc",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        360,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Gestão de usuários e conversas\n",
+        "height": 349.90923164085467,
+        "width": 1251.9801211922836,
+        "color": 4
+      },
+      "id": "2db5b058-9431-4fd6-a8bc-1caa9a53e88d",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        580,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Agente IA",
+        "height": 591.2978758892514,
+        "width": 1319.0739133248394,
+        "color": 5
+      },
+      "id": "a3633b1a-2656-4286-8879-0b5cd4d9f0b4",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1860,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Respondendo WhatsApp",
+        "height": 254.66258309366492,
+        "width": 455.84858919175184,
+        "color": 7
+      },
+      "id": "f81158c5-93a6-40b4-8e30-e27df27c93b0",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3219,
+        534.3718383904818
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "720d46da-db67-4628-9319-4730b39d3865",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1660,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bcf5d7ec-9660-4927-92ac-d857a5367d8d",
+        "options": {}
+      },
+      "id": "1563e8f8-b1e8-4743-a7b6-0a0270efee84",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        406,
+        600
+      ],
+      "webhookId": "bcf5d7ec-9660-4927-92ac-d857a5367d8d"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Simplificação de Dados": {
+      "main": [
+        [
+          {
+            "node": "Buscar Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtro Inicial": {
+      "main": [
+        [
+          {
+            "node": "Simplificação de Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Cliente": {
+      "main": [
+        [
+          {
+            "node": "Cliente Existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cliente Existe?": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "[OpenAI] Criar Thread",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Cliente": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "(Z-API) Enviar Mensagem": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[OpenAI] Criar Thread": {
+      "main": [
+        [
+          {
+            "node": "Criar Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[OpenAI] Adicionar Mensagem na Thread": {
+      "main": [
+        [
+          {
+            "node": "[OpenAI] Criar Run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[OpenAI] Criar Run": {
+      "main": [
+        [
+          {
+            "node": "Espera 3 seg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[OpenAI] Listar Mensagens Thread": {
+      "main": [
+        [
+          {
+            "node": "(Z-API) Enviar Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qual o status da Run?": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "[OpenAI] Listar Mensagens Thread",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Espera 3 seg",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[OpenAI] Buscar Status da Run": {
+      "main": [
+        [
+          {
+            "node": "Qual o status da Run?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Espera 3 seg": {
+      "main": [
+        [
+          {
+            "node": "[OpenAI] Buscar Status da Run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "[OpenAI] Adicionar Mensagem na Thread",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Filtro Inicial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f040470e-0fc2-485f-aa4b-24f8bef0e733",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c2cf0571d78da189c5916e815dd57e9fc54736be5196d86f4402a03a1245164c"
+  },
+  "id": "j0dC0wCVrzXtptaE",
+  "tags": [
+    {
+      "createdAt": "2024-09-14T16:51:28.535Z",
+      "updatedAt": "2024-09-14T16:51:28.535Z",
+      "id": "690f47PmWdvT1q1Y",
+      "name": "NoCode StartUp"
+    },
+    {
+      "createdAt": "2024-09-14T16:51:47.760Z",
+      "updatedAt": "2024-09-14T16:52:03.399Z",
+      "id": "7GTx0OddOX0WQ0KK",
+      "name": "Formação Assistants"
+    },
+    {
+      "createdAt": "2024-09-14T16:52:10.741Z",
+      "updatedAt": "2024-09-14T16:52:10.741Z",
+      "id": "8kSxs5DUMNDEnge2",
+      "name": "Modelo"
+    }
+  ]
+}

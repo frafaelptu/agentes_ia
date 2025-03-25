@@ -1,0 +1,2372 @@
+{
+  "name": "[F. Assistants] Case 4. Agente Vendedor (Function Calling)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "dd9a4a09-e9c8-4f65-806b-6eb97b30dfa1",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        6360,
+        595
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "69f6217f-9063-423f-abf4-e94f6b70f94e",
+              "name": "ClienteNome",
+              "value": "={{ $('Webhook').item.json.body.senderName }}",
+              "type": "string"
+            },
+            {
+              "id": "9f488c5c-0b3b-48e9-87b1-5a22d513d1ec",
+              "name": "ClienteTelefone",
+              "value": "={{ $('Webhook').item.json.body.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "1ae1a51c-00cb-47f9-8dc8-5a05c66fc0c8",
+              "name": "Mensagem",
+              "value": "={{ $json.body.text.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": "=",
+        "options": {}
+      },
+      "id": "e41bd1f1-278d-4b6a-aba8-974835b57570",
+      "name": "Simplificação de Dados",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        760,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "24aa4532-80db-4c1e-977a-0036b82a8e5f",
+              "leftValue": "={{ $json.body.isEdit }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "204f54b0-e3ed-4ff4-8302-8c20d3b8aa78",
+              "leftValue": "={{ $json.body.isGroup }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "130cc493-a17a-4cc1-955b-816799583076",
+              "leftValue": "={{ $json.body.isNewsletter }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c51986d9-f347-4198-89bb-9e4cd0f021c9",
+              "leftValue": "={{ $json.body.broadcast }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "cc7281fe-f597-43d4-820e-241f0f4c0410",
+              "leftValue": "={{ $json.body.fromApi }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "62ea179d-7dbe-4cc2-9dd5-736b6372da9d",
+      "name": "Filtro Inicial",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.1,
+      "position": [
+        560,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "usuarios",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "whatsapp",
+              "keyValue": "={{ $json.ClienteTelefone }}"
+            }
+          ]
+        }
+      },
+      "id": "85894dbd-2062-4bef-8b8e-04220a67e561",
+      "name": "Buscar Cliente",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        980,
+        600
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "c3ppibhd1RX2rXji",
+          "name": "Supabase Neto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "3419c30f-4400-401b-bf40-db1579507f96",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b9d51219-7f8c-4684-9ded-33ba192f089b",
+      "name": "Cliente Existe?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.1,
+      "position": [
+        1200,
+        600
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "tableId": "usuarios",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $('Simplificação de Dados').item.json.ClienteNome }}"
+            },
+            {
+              "fieldId": "whatsapp",
+              "fieldValue": "={{ $('Simplificação de Dados').item.json.ClienteTelefone }}"
+            },
+            {
+              "fieldId": "thread_id",
+              "fieldValue": "={{ $json.id }}"
+            }
+          ]
+        }
+      },
+      "id": "31597456-59e6-4f4e-bec2-78166daa0bfd",
+      "name": "Criar Cliente",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1620,
+        660
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "c3ppibhd1RX2rXji",
+          "name": "Supabase Neto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3CCB76D5C423A0191FA39E692ED0BBB5/token/2FEBF455B542CA12B231414C/send-text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $('Simplificação de Dados').item.json.ClienteTelefone }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.data[0].content[0].text.value }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "01e7a42c-b803-4f29-a2f8-bbc6da945505",
+      "name": "(Z-API) Enviar Mensagem",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6180,
+        595
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "18ZooK5mNEEU3JoS",
+          "name": "Z-API Security Token"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "dadcafc7-ca62-40a5-a932-7d66556db0cc",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1840,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/threads",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "OpenAI-Beta",
+              "value": "assistants=v2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d9ea8b7b-8f92-4598-add1-f0ae3784c3a1",
+      "name": "[OpenAI] Criar Thread",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1460,
+        660
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "zK1bsB4i4ETFQdEq",
+          "name": "OpenAI NoCode StartUp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.openai.com/v1/threads/{{ $json.thread_id }}/runs",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "OpenAI-Beta",
+              "value": "assistants=v2"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "assistant_id",
+              "value": "asst_WwQOWO13uP5MlZDFoLroEuev"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2d98ca3f-76a0-41a1-ab45-a569b96fe377",
+      "name": "[OpenAI] Criar Run",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2450,
+        594
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "zK1bsB4i4ETFQdEq",
+          "name": "OpenAI NoCode StartUp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "errorMessage": "Algum erro na execução na Run"
+      },
+      "id": "01d4f037-f32f-4b86-8759-8e28a4d9a7b3",
+      "name": "Stop and Error",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        3370,
+        834
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "id": "7b60eb07-9cf9-4ce1-bf3b-7f56454be8e6",
+      "name": "Espera 3 seg",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2670,
+        594
+      ],
+      "webhookId": "34bdfd2e-07e9-4436-95cb-87d8a1893014"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.openai.com/v1/threads/{{ $('Merge').item.json.thread_id }}/runs",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "OpenAI-Beta",
+              "value": "assistants=v2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5d74b626-a36d-472a-ba76-45ce0daa45e0",
+      "name": "[OpenAI] Listar Runs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2250,
+        794
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "zK1bsB4i4ETFQdEq",
+          "name": "OpenAI NoCode StartUp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.openai.com/v1/threads/{{ $('Merge').item.json.thread_id }}/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "OpenAI-Beta",
+              "value": "assistants=v2"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "role",
+              "value": "user"
+            },
+            {
+              "name": "content",
+              "value": "={{ $('Simplificação de Dados').item.json.Mensagem }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "503f8295-da33-4180-9d3f-fa17c69f0896",
+      "name": "[OpenAI] Adicionar Mensagem na Thread",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2210,
+        594
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "zK1bsB4i4ETFQdEq",
+          "name": "OpenAI NoCode StartUp"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.openai.com/v1/threads/{{ $json.data[0].thread_id }}/runs/{{ $json.data[0].id }}/cancel",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "OpenAI-Beta",
+              "value": "assistants=v2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "02d7e8fd-2500-4ad5-8d3d-dfef1bf3424a",
+      "name": "[OpenAI] Cancelar Run",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2250,
+        1014
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "zK1bsB4i4ETFQdEq",
+          "name": "OpenAI NoCode StartUp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "tool_calls",
+        "options": {}
+      },
+      "id": "f3758b14-ee40-471a-ba80-ed4250043b6c",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        3573,
+        166
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "28ce9dad-36a0-4015-9072-a74e35bcd33a",
+              "name": "name",
+              "value": "={{ $json.function.name }}",
+              "type": "string"
+            },
+            {
+              "id": "0156c707-54c3-4bc8-a404-5810683ddc2f",
+              "name": "arguments",
+              "value": "={{ $json.function.arguments }}",
+              "type": "string"
+            },
+            {
+              "id": "15947de1-0f0f-4968-a40c-7e36a540ea6d",
+              "name": "type",
+              "value": "={{ $json.type }}",
+              "type": "string"
+            },
+            {
+              "id": "00f6f57f-7f82-4193-afd8-ded4c5824cad",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4bdfff6e-5f6d-4298-b3ac-6a6e28fd1190",
+      "name": "Dados individuais das tools",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3753,
+        166
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "44673af0-d1a2-46a4-aa4a-42df4a6270a4",
+              "name": "arguments",
+              "value": "={{ $json.arguments }}",
+              "type": "object"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "73297788-518b-49ed-a032-f246168cfdd3",
+      "name": "Argumentos da Tools",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4153,
+        186
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "83ad07d2-6655-4675-8ea6-8d4bd6296f5c",
+              "name": "thread_id",
+              "value": "={{ $json.thread_id }}",
+              "type": "string"
+            },
+            {
+              "id": "b00c6dba-371d-4aa2-900f-a108f112cace",
+              "name": "run_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "1aa088be-5f08-48aa-a30d-27ce153fae36",
+              "name": "tool_calls",
+              "value": "={{ $json.required_action.submit_tool_outputs.tool_calls }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "550d2626-9771-4b3f-84ff-bdafe18c716f",
+      "name": "Parâmentros das Tools",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3393,
+        166
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.openai.com/v1/threads/{{ $json.thread_id }}/runs/{{ $json.id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "OpenAI-Beta",
+              "value": "assistants=v2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ec2bc219-b1da-40c5-8607-5edafd0fbf64",
+      "name": "[OpenAI] Buscar Status da Run",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2890,
+        594
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "zK1bsB4i4ETFQdEq",
+          "name": "OpenAI NoCode StartUp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "tool_outputs",
+        "options": {}
+      },
+      "id": "b862b23b-3648-4ce8-b926-31acb085ff4c",
+      "name": "Aggregate",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        4053,
+        -194
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "411123bf-7975-4d79-a766-351a605f414c",
+              "name": "tool_outputs",
+              "value": "={{ $json.tool_outputs }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "71389f86-9b3f-44c0-90c9-ef63f08a270e",
+      "name": "Edit Fields5",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4213,
+        -194
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sandbox.asaas.com/api/v3/customers",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "content-type",
+              "value": "application/json"
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $('Argumentos da Tools').item.json.arguments.cliente_nome }}"
+            },
+            {
+              "name": "cpfCnpj",
+              "value": "={{ $('Argumentos da Tools').item.json.arguments.cliente_cpf }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b470371c-3d50-4dca-b262-ee73786eebed",
+      "name": "Criar Cliente1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5050,
+        -746
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "J0PaxPvc0rJlaIFj",
+          "name": "Asaas API SandBox"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sandbox.asaas.com/api/v3/payments",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "billingType",
+              "value": "PIX"
+            },
+            {
+              "name": "customer",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "name": "value",
+              "value": "={{ $('Buscar Produto').item.json.valor }}"
+            },
+            {
+              "name": "dueDate",
+              "value": "={{$now.plus(2, 'days')}}"
+            },
+            {
+              "name": "description",
+              "value": "=Link de pagamento para Formação {{ $('Buscar Produto').item.json.nome }} da NoCode StartUp.\n\nSeja bem vindo!"
+            },
+            {
+              "value": "={{ $now.plus(2, 'days') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "af723629-afa8-4919-ad28-18e89fe2b458",
+      "name": "Criar Link Checkout",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5230,
+        -746
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "J0PaxPvc0rJlaIFj",
+          "name": "Asaas API SandBox"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Gestão de usuários e conversas",
+        "height": 470.66144701482347,
+        "width": 1548.498147684436,
+        "color": 4
+      },
+      "id": "e448afe0-9f51-4a30-8a67-17538062360c",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        467.57186037943666,
+        420.8834549672763
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "usuarios",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "whatsapp",
+              "keyValue": "={{ $('Simplificação de Dados').item.json.ClienteTelefone }}"
+            }
+          ]
+        }
+      },
+      "id": "a1131d97-660c-4a6a-ab1a-e2dd2e67fe26",
+      "name": "Buscar usuário",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        4875,
+        -1308
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "c3ppibhd1RX2rXji",
+          "name": "Supabase Neto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "produtos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $('Argumentos da Tools').item.json.arguments.id_produto }}"
+            }
+          ]
+        }
+      },
+      "id": "d0fcdbe2-1192-454c-b069-661fd42cb167",
+      "name": "Buscar Produto",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        4870,
+        -746
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "c3ppibhd1RX2rXji",
+          "name": "Supabase Neto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "pedidos",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "asaas_id",
+              "fieldValue": "={{ $('Criar Link Checkout').item.json.id }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $('Criar Link Checkout').item.json.status }}"
+            },
+            {
+              "fieldId": "usuario_id",
+              "fieldValue": "={{ $json.id }}"
+            },
+            {
+              "fieldId": "produto_id",
+              "fieldValue": "={{ $('Buscar Produto').item.json.id }}"
+            }
+          ]
+        }
+      },
+      "id": "fdcda447-311d-407b-938b-2fe9dffc7b98",
+      "name": "Criar Pedido",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        5590,
+        -746
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "c3ppibhd1RX2rXji",
+          "name": "Supabase Neto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Loop Funções",
+        "height": 384.7161754466947,
+        "width": 1278.236022443546,
+        "color": 6
+      },
+      "id": "e3db053a-a3b9-4a2c-8c24-37b0db94c0f8",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3280,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Função 1: getProdutos",
+        "height": 633.1431906329082,
+        "width": 1194.3096289795617,
+        "color": 3
+      },
+      "id": "75d705a2-410e-4027-9e1a-4671edf9141a",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4780,
+        -220
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Função 3: getUsers",
+        "height": 572.1848462438363,
+        "width": 1189.3614743141625,
+        "color": 3
+      },
+      "id": "b460adf8-7f7b-4473-81d5-09076091f318",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4770,
+        -1466
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Função 2: postPedidos",
+        "height": 572.1848462438363,
+        "width": 1200.9071685334256,
+        "color": 3
+      },
+      "id": "8c037ce5-8754-40da-8e8c-858e98d395e2",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4780,
+        -840
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Respondendo Função",
+        "height": 261.7237534100784,
+        "width": 589.0475656915123,
+        "color": 6
+      },
+      "id": "4135dcae-0b5a-449e-8d4b-c93d0b0193f1",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3973,
+        -254
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Respondendo Usuário",
+        "height": 297.2479283127495,
+        "width": 478.7211802391986,
+        "color": 7
+      },
+      "id": "f0c17927-aae5-4133-b052-7ffced1e4a58",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6120,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Agente IA",
+        "height": 3486.241122797087,
+        "width": 3978.3019178628183,
+        "color": 5
+      },
+      "id": "8c62bd23-c871-45b1-b2db-85d14a894a1f",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2080,
+        -2200
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Gatilhos",
+        "height": 470.66144701482347,
+        "width": 401.92272567732755
+      },
+      "id": "556d9ef1-f2f2-4af1-a3be-ad6ad41c3487",
+      "name": "Sticky Note10",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Função 4: updateUser",
+        "height": 572.1848462438363,
+        "width": 1181.114549871832,
+        "color": 3
+      },
+      "id": "0e0b2b73-40b3-4229-87ca-861eff57805a",
+      "name": "Sticky Note11",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4770,
+        -2086
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "usuarios",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "whatsapp",
+              "keyValue": "={{ $('Simplificação de Dados').item.json.ClienteTelefone }}"
+            }
+          ]
+        }
+      },
+      "id": "828801f7-11e7-400f-b87d-44ab911550ff",
+      "name": "Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        5410,
+        -746
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "c3ppibhd1RX2rXji",
+          "name": "Supabase Neto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "d0132960-a69b-46f0-ab2b-7fe3b67c965d",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "requires_action",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "requires_action"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "a8e31c39-770b-47f4-9d72-62ba8cd3ed96",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "completed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "completed"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "9c3456a0-d550-4b1e-9eea-8e620c31b2f2",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "in_progress",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "in_progress"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "error"
+        }
+      },
+      "id": "522bee32-e98d-41af-9a2d-1ec8e4a1633e",
+      "name": "Qual o status da Run?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.1,
+      "position": [
+        3130,
+        594
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "produtos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "categoria",
+              "condition": "eq",
+              "keyValue": "={{ $json.arguments.categoria }}"
+            }
+          ]
+        }
+      },
+      "id": "06acda9f-ec3c-4fb6-bff9-c85dd21e423e",
+      "name": "Buscar protudos pela categoria",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        5100,
+        120
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "c3ppibhd1RX2rXji",
+          "name": "Supabase Neto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "produtos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "nome",
+              "condition": "ilike",
+              "keyValue": "={{ $json.arguments.nome }}*"
+            }
+          ]
+        }
+      },
+      "id": "11acd9af-38a6-4fe6-9386-0455430897ad",
+      "name": "Buscar Produtos pelo Nome",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        5100,
+        -40
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "c3ppibhd1RX2rXji",
+          "name": "Supabase Neto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "concatenate",
+              "field": "produto"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "697d1498-fda2-4305-9cf3-e5e6187bb028",
+      "name": "Concatenando String",
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1,
+      "position": [
+        5770,
+        34
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3a3fbf83-7260-4dfa-97f2-4f323816d776",
+              "name": "tool_call_id",
+              "value": "={{ $('Argumentos da Tools').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "3c185636-3fe8-4d4b-8a6b-e3bf5613c503",
+              "name": "output",
+              "value": "={{ $json.concatenated_produto }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "37b91e28-52a5-4970-9aac-a4b91c4e07fd",
+      "name": "Resposta da Tool getCursos",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5770,
+        214
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e812113e-dd46-486a-82fc-e14855c2be8c",
+              "name": "produto",
+              "value": "=(ID: {{ $json.id }}, nome: {{ $('Merge1').item.json.nome }}, valor: {{ $('Merge1').item.json.valor }}, proxima turma: {{ $('Merge1').item.json.proxima_turma }}, categoria: {{ $('Merge1').item.json.categoria }})",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e0270c2a-f44c-4dcb-b285-578f02001a1f",
+      "name": "Construindo String",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5560,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "usuarios",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "whatsapp",
+              "condition": "eq",
+              "keyValue": "={{ $('Simplificação de Dados').item.json.ClienteTelefone }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "cpf",
+              "fieldValue": "={{ $json.arguments.cliente_cpf }}"
+            },
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $json.arguments.cliente_nome }}"
+            }
+          ]
+        }
+      },
+      "id": "8c62fef2-a984-48f5-9b4e-2e25e418d47c",
+      "name": "Atualizar Usuário",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        4875,
+        -1928
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "c3ppibhd1RX2rXji",
+          "name": "Supabase Neto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": "={{ $node['Loop Over Items'].context[\"done\"] }}"
+        }
+      },
+      "id": "45cabafc-ad88-4ec0-ac7c-aa7baf8d2542",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        3973,
+        166
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b5eaff7e-ca80-444b-93a6-2a9de03ffa22",
+              "name": "usuario",
+              "value": "=(nome: {{ $json.nome }}, cpf: {{ $json.cpf }})",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "17635f80-184e-42a1-9646-68b0c106bc97",
+      "name": "Construindo String1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5055,
+        -1308
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6412cebd-4191-453b-97d3-8e302756396c",
+              "name": "tool_call_id",
+              "value": "={{ $('Argumentos da Tools').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "a2e8d52a-04e2-4fbf-876c-cbc3c3348d25",
+              "name": "output",
+              "value": "={{ $json.usuario }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "460ee974-2975-457f-8b9d-029770477d91",
+      "name": "Resposta da Tool getUsers",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5055,
+        -1128
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.openai.com/v1/threads/{{ $('Parâmentros das Tools').item.json.thread_id }}/runs/{{ $('Parâmentros das Tools').item.json.run_id }}/submit_tool_outputs",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "OpenAI-Beta",
+              "value": "assistants=v2"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"tool_outputs\": {{ $json.tool_outputs }}\n}",
+        "options": {}
+      },
+      "id": "7f672aa7-6710-47b0-8b3e-25e8503c8bf8",
+      "name": "Responder a Function Calling",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4373,
+        -194
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "zK1bsB4i4ETFQdEq",
+          "name": "OpenAI NoCode StartUp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9151a058-7dd6-4ca2-8e99-354d5f4e22a4",
+              "name": "link de pagamento",
+              "value": "=(URL: {{ $('Criar Link Checkout').item.json.invoiceUrl }})",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "aa1bd8fb-7aa3-40eb-9b9a-ef96e98dd7d8",
+      "name": "Construindo String2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5770,
+        -746
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3a3fbf83-7260-4dfa-97f2-4f323816d776",
+              "name": "tool_call_id",
+              "value": "={{ $('Argumentos da Tools').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "3c185636-3fe8-4d4b-8a6b-e3bf5613c503",
+              "name": "output",
+              "value": "={{ $json['link de pagamento'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1f9f862f-e4ed-4abd-a0a0-b896fe81d454",
+      "name": "Resposta da Tool postPedidos",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5760,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f45a1483-7a89-4da8-a09a-8b878e83a3aa",
+              "name": "usuario",
+              "value": "=(nome: {{ $json.nome }}, cpf: {{ $json.cpf }})",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f476db13-0f27-4cfb-9413-ee4f52bae349",
+      "name": "Construindo String3",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5055,
+        -1928
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.openai.com/v1/threads/{{ $('[OpenAI] Buscar Status da Run').item.json.thread_id }}/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "OpenAI-Beta",
+              "value": "assistants=v2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b5813c71-b29a-4b3e-9f2e-2f214f4d757c",
+      "name": "[OpenAI] Listar Mensagens Thread",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3370,
+        594
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "zK1bsB4i4ETFQdEq",
+          "name": "OpenAI NoCode StartUp"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "df127f83-902e-42ec-a6a2-a6012dfc89d3",
+      "name": "Merge1",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        5280,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "37f77e44-5888-4c61-8f15-3ec8bc33be9d",
+              "name": "tool_call_id",
+              "value": "={{ $('Argumentos da Tools').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "3e00f6bb-e04e-491a-938b-b76e9f5a8b87",
+              "name": "output",
+              "value": "={{ $json.usuario }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ae8d18ea-0956-4555-9185-a6bb88fe6487",
+      "name": "Resposta da Tool updateUser",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5055,
+        -1748
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "4c77a671-79cf-4d96-9683-9597c4c2bb46",
+                    "leftValue": "={{ $json.name }}",
+                    "rightValue": "postPedido",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "postPedido"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "38e7c7a5-0727-4f80-960c-7f6895b53383",
+                    "leftValue": "={{ $json.name }}",
+                    "rightValue": "getUser",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "getUser"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.name }}",
+                    "rightValue": "getCursos",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "getCursos"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "0f528545-9509-49ba-b660-3ff61c150129",
+                    "leftValue": "={{ $json.name }}",
+                    "rightValue": "updateUser",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "updateUser"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "75fc2623-f7b2-46d0-983f-dbc6b79f4887",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.1,
+      "position": [
+        4333,
+        186
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Argumentos da Tools').item.json.arguments.nome }}",
+                    "rightValue": "=",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "nome existe"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "78f68ee4-ef94-4366-930b-a254fddaa7d6",
+                    "leftValue": "={{ $('Argumentos da Tools').item.json.arguments.categoria }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "categoria existe"
+            }
+          ]
+        },
+        "options": {
+          "allMatchingOutputs": true
+        }
+      },
+      "id": "118f890c-3e7e-40ad-9f92-0f7c15a76617",
+      "name": "Switch1",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.1,
+      "position": [
+        4840,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "6798dba6-fdde-4111-afea-5666baf77e8d",
+        "options": {}
+      },
+      "id": "f60f9948-7e83-435a-b68d-fa6ed25dcbae",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        140,
+        600
+      ],
+      "webhookId": "6798dba6-fdde-4111-afea-5666baf77e8d"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Simplificação de Dados": {
+      "main": [
+        [
+          {
+            "node": "Buscar Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtro Inicial": {
+      "main": [
+        [
+          {
+            "node": "Simplificação de Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Cliente": {
+      "main": [
+        [
+          {
+            "node": "Cliente Existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cliente Existe?": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "[OpenAI] Criar Thread",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Cliente": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "(Z-API) Enviar Mensagem": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "[OpenAI] Adicionar Mensagem na Thread",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[OpenAI] Criar Thread": {
+      "main": [
+        [
+          {
+            "node": "Criar Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[OpenAI] Criar Run": {
+      "main": [
+        [
+          {
+            "node": "Espera 3 seg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Espera 3 seg": {
+      "main": [
+        [
+          {
+            "node": "[OpenAI] Buscar Status da Run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[OpenAI] Listar Runs": {
+      "main": [
+        [
+          {
+            "node": "[OpenAI] Cancelar Run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[OpenAI] Adicionar Mensagem na Thread": {
+      "main": [
+        [
+          {
+            "node": "[OpenAI] Criar Run",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "[OpenAI] Listar Runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[OpenAI] Cancelar Run": {
+      "main": [
+        [
+          {
+            "node": "[OpenAI] Adicionar Mensagem na Thread",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Dados individuais das tools",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dados individuais das tools": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Argumentos da Tools": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[OpenAI] Buscar Status da Run": {
+      "main": [
+        [
+          {
+            "node": "Qual o status da Run?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields5": {
+      "main": [
+        [
+          {
+            "node": "Responder a Function Calling",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Cliente1": {
+      "main": [
+        [
+          {
+            "node": "Criar Link Checkout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Link Checkout": {
+      "main": [
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar usuário": {
+      "main": [
+        [
+          {
+            "node": "Construindo String1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Produto": {
+      "main": [
+        [
+          {
+            "node": "Criar Cliente1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Pedido": {
+      "main": [
+        [
+          {
+            "node": "Construindo String2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parâmentros das Tools": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase": {
+      "main": [
+        [
+          {
+            "node": "Criar Pedido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qual o status da Run?": {
+      "main": [
+        [
+          {
+            "node": "Parâmentros das Tools",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "[OpenAI] Listar Mensagens Thread",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Espera 3 seg",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar protudos pela categoria": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Buscar Produtos pelo Nome": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Concatenando String": {
+      "main": [
+        [
+          {
+            "node": "Resposta da Tool getCursos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resposta da Tool getCursos": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Construindo String": {
+      "main": [
+        [
+          {
+            "node": "Concatenando String",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Usuário": {
+      "main": [
+        [
+          {
+            "node": "Construindo String3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Argumentos da Tools",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Construindo String1": {
+      "main": [
+        [
+          {
+            "node": "Resposta da Tool getUsers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resposta da Tool getUsers": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responder a Function Calling": {
+      "main": [
+        [
+          {
+            "node": "Espera 3 seg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Construindo String2": {
+      "main": [
+        [
+          {
+            "node": "Resposta da Tool postPedidos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resposta da Tool postPedidos": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Construindo String3": {
+      "main": [
+        [
+          {
+            "node": "Resposta da Tool updateUser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[OpenAI] Listar Mensagens Thread": {
+      "main": [
+        [
+          {
+            "node": "(Z-API) Enviar Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Construindo String",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resposta da Tool updateUser": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Buscar Produto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar usuário",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Atualizar Usuário",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Buscar Produtos pelo Nome",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar protudos pela categoria",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Filtro Inicial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2d9f35c1-acbe-411c-baad-363922efa5b7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c2cf0571d78da189c5916e815dd57e9fc54736be5196d86f4402a03a1245164c"
+  },
+  "id": "WqMtYYEdDsJQRqca",
+  "tags": [
+    {
+      "createdAt": "2024-09-14T16:51:28.535Z",
+      "updatedAt": "2024-09-14T16:51:28.535Z",
+      "id": "690f47PmWdvT1q1Y",
+      "name": "NoCode StartUp"
+    },
+    {
+      "createdAt": "2024-09-14T16:51:47.760Z",
+      "updatedAt": "2024-09-14T16:52:03.399Z",
+      "id": "7GTx0OddOX0WQ0KK",
+      "name": "Formação Assistants"
+    },
+    {
+      "createdAt": "2024-09-14T16:52:10.741Z",
+      "updatedAt": "2024-09-14T16:52:10.741Z",
+      "id": "8kSxs5DUMNDEnge2",
+      "name": "Modelo"
+    }
+  ]
+}

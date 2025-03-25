@@ -1,0 +1,552 @@
+{
+  "name": "M4.3 - INTEGRACAO-MEGA-API-SUPABASE-DIFY",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "66f4413d-7bf1-4408-a5b5-cfaafa472cea",
+              "leftValue": "={{ $json.usuario_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c9bef6c5-8a52-4dc5-a178-5ae8c2a620c8",
+      "name": "Usuário Existe?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        960,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c27dab1e-3cf4-41cf-8d23-7bbe466321b2",
+              "name": "nome",
+              "value": "={{ $json.body.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "7ce5fcad-d59b-489f-b526-6fee81a70128",
+              "name": "Mensagem",
+              "value": "={{ $json.body.message.conversation }}",
+              "type": "string"
+            },
+            {
+              "id": "8a72e1e7-1747-424a-adbb-9ed94c4b2379",
+              "name": "celular",
+              "value": "={{ $json.body.key.remoteJid.split('@')[0]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "27ce7d99-d752-425d-84cc-458fab354154",
+      "name": "Infos Manuais",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        680,
+        580
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.dify.ai/v1/chat-messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer [SUA CHAVE API AQUI]"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "inputs"
+            },
+            {
+              "name": "query",
+              "value": "={{ $('Infos Manuais').item.json.Mensagem }}"
+            },
+            {
+              "name": "response_mode",
+              "value": "streaming"
+            },
+            {
+              "name": "conversation_id",
+              "value": "={{ $json.conversaDify_id }}"
+            },
+            {
+              "name": "user",
+              "value": "={{ $('Infos Manuais').item.json.celular }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "08e99dec-955e-4f06-adb9-6c8c88c67cf6",
+      "name": "Dify |Criar Conversa + Executa Agente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1540,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "b069f56f-123a-436b-aaab-9c9b7ba7693f",
+              "leftValue": "={{ $json.body.isGroup }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "9590e7cf-f8ab-4314-92be-b033f68b58b4",
+              "leftValue": "={{ $json.body.key.fromMe }}",
+              "rightValue": "554899260823",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "bc9b7f2a-41e2-4c62-add5-e98316391fe8",
+      "name": "Verificar Condições",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        500,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Gatilho - Receber Msg Whatsapp",
+        "height": 304.2933006536471,
+        "width": 268.42825338387223
+      },
+      "id": "a00bf1a8-9a45-409e-bf2b-d950ec01b148",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        160,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Gestão usuários e conversas",
+        "height": 424.442374124132,
+        "width": 975.7768703810513,
+        "color": 4
+      },
+      "id": "84167512-af65-40d4-9c23-b6b75ccbb9ae",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        460,
+        502.60118096167093
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Agente IA",
+        "height": 425.8624134895209,
+        "width": 257.1129207870666,
+        "color": 5
+      },
+      "id": "df01575f-7c8f-40e0-81a0-ccf33b450619",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1460,
+        501.1811415962819
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Responder msg WhatsApp",
+        "height": 323.41394755351655,
+        "width": 239.7012260879508
+      },
+      "id": "5202815d-bbf3-493d-b2b7-81adc5bd0c3a",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2160,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://apinocode01.megaapi.com.br/rest/sendMessage/[SUA INSTANCIA AQUI]/text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer [SEU TOKEN AQUI]"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"messageData\": {\n        \"to\": \"{{ $('Webhook').first().json.body.key.remoteJid }}\",\n        \"text\": \"{{ $('Código - Extrair dados do Streaming1').item.json.answer.replace(/\\n/g, '\\\\n').replace(/[\"]/g, '\\\\\"') }}\"\n    }\n} ",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "id": "7b1001d1-3b79-4037-812a-a97bfca7971d",
+      "name": "ChamadaAPI - Mega API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2240,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "usuarios",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "celular",
+              "keyValue": "={{ $json.celular }}"
+            }
+          ]
+        }
+      },
+      "id": "64f04f2d-3f1b-45d8-9f14-3b46c2b3af68",
+      "name": "Usuário existe?",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        820,
+        660
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "q8fHAvRB8yZ0YcfK",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "usuarios",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $('Infos Manuais').item.json.nome }}"
+            },
+            {
+              "fieldId": "celular",
+              "fieldValue": "={{ $('Infos Manuais').item.json.celular }}"
+            }
+          ]
+        }
+      },
+      "id": "e1ff78f1-c4c9-44b8-8637-e697ec03da44",
+      "name": "Criar Usuário",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        740
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "q8fHAvRB8yZ0YcfK",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Recebe a entrada de dados dinâmicos do N8N\n\nconst items = $input.all(); // Captura todos os dados de entrada no N8N\n\nlet finalAnswer = \"\";\n\nlet conversationId = \"\";\n\nlet userId = \"\"; // Se precisar de um user_id, ajuste conforme o campo disponível\n\n// Função para extrair o JSON de dentro da string 'data'\n\nfunction extractJSONFromDataString(dataString) {\n\n  // Extrai apenas o conteúdo JSON da string 'data: {...}'\n\n  const jsonString = dataString.replace(\"data: \", \"\").trim();\n\n  return JSON.parse(jsonString);\n\n}\n\n// Itera sobre os dados de entrada e processa cada um\n\nfor (let i = 0; i < items.length; i++) {\n\n  // Verifica se a propriedade 'data' está presente e é uma string\n\n  if (items[i].json.data && typeof items[i].json.data === 'string') {\n\n    const dataLines = items[i].json.data.split(\"\\n\"); // Divide cada linha de \"data\" como string separada\n\n    \n\n    // Itera sobre cada linha de JSON em 'data'\n\n    for (let j = 0; j < dataLines.length; j++) {\n\n      if (dataLines[j].trim()) { // Ignora linhas vazias\n\n        const parsedData = extractJSONFromDataString(dataLines[j]); // Extrai o JSON\n\n        // Captura o conversation_id\n\n        if (!conversationId && parsedData.conversation_id) {\n\n          conversationId = parsedData.conversation_id;\n\n        }\n\n        // Se o evento for 'agent_message', concatenar a resposta\n\n        if (parsedData.event === \"agent_message\" && parsedData.answer) {\n\n          finalAnswer += parsedData.answer + \" \"; // Adiciona espaço entre as respostas\n\n        }\n\n        // Caso o evento seja 'agent_thought' e o campo 'thought' tenha valor, usa como resposta final\n\n        if (parsedData.event === \"agent_thought\" && parsedData.thought) {\n\n          finalAnswer = parsedData.thought; // Substitui a resposta final com o pensamento completo do agente\n\n        }\n\n      }\n\n    }\n\n  } else {\n\n    // Loga um erro ou mensagem se a propriedade 'data' não existir ou não for uma string\n\n    console.error(`Item ${i} não contém uma propriedade 'data' válida`);\n\n  }\n\n}\n\n// Simula os dados adicionais para retriever_resources (baseado na sua saída de exemplo)\n\nconst retrieverResources = [\n\n  {\n\n    position: 1,\n\n    dataset_id: \"101b4c97-fc2e-463c-90b1-5261a4cdcafb\",\n\n    dataset_name: \"iPhone\",\n\n    document_id: \"8dd1ad74-0b5f-4175-b735-7d98bbbb4e00\",\n\n    document_name: \"iPhone List\",\n\n    segment_id: \"ed599c7f-2766-4294-9d1d-e5235a61270a\",\n\n    score: 0.98457545,\n\n    content: `\"Model\",\"Release Date\",\"Display Size\",\"Resolution\",\"Processor\",\"RAM\",\"Storage\",\"Camera\",\"Battery\",\"Operating System\"\\n\"iPhone 13 Pro Max\",\"September 24, 2021\",\"6.7 inch\",\"1284 x 2778\",\"Hexa-core (2x3.23 GHz Avalanche + 4x1.82 GHz Blizzard)\",\"6 GB\",\"128, 256, 512 GB, 1TB\",\"12 MP\",\"4352 mAh\",\"iOS 15\"`\n\n  }\n\n];\n\n// Cria a saída final organizada\n\nconst finalOutput = {\n\n  event: \"message\",\n\n  message_id: \"9da23599-e713-473b-982c-4328d4f5c78a\", // Ajuste conforme necessário para gerar IDs dinâmicos\n\n  conversation_id: conversationId,\n\n  mode: \"chat\", // Presume-se que o modo seja 'chat'\n\n  answer: finalAnswer.trim(), // Resposta final concatenada e sem espaços extras\n\n  metadata: {\n\n    usage: {\n\n      prompt_tokens: 1033,\n\n      prompt_unit_price: \"0.001\",\n\n      prompt_price_unit: \"0.001\",\n\n      prompt_price: \"0.0010330\",\n\n      completion_tokens: 128,\n\n      completion_unit_price: \"0.002\",\n\n      completion_price_unit: \"0.001\",\n\n      completion_price: \"0.0002560\",\n\n      total_tokens: 1161,\n\n      total_price: \"0.0012890\",\n\n      currency: \"USD\",\n\n      latency: 0.7682376249867957 // Simula um tempo de latência\n\n    },\n\n    retriever_resources: retrieverResources // Inclui os recursos simulados\n\n  },\n\n  created_at: Math.floor(Date.now() / 1000) // Timestamp atual em segundos\n\n};\n\n// Retorna a saída final\n\nreturn finalOutput;"
+      },
+      "id": "8b391a5a-2d29-4b69-aa5c-0cb0903c699b",
+      "name": "Código - Extrair dados do Streaming1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1800,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Tratamento Dados e Gestão usuários",
+        "height": 427.28245285491,
+        "width": 372.7747201454366,
+        "color": 4
+      },
+      "id": "5c95895e-fbb8-4506-a93a-271f1b3a2b81",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1746.5934170452779,
+        499.7611022308928
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "usuarios",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "celular",
+              "condition": "eq",
+              "keyValue": "={{ $('Infos Manuais').first().json.celular }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "conversaDify_id",
+              "fieldValue": "={{ $json.conversation_id }}"
+            }
+          ]
+        }
+      },
+      "id": "4679192a-adad-4477-a8e2-ae8c42d3028b",
+      "name": "Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1960,
+        660
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "q8fHAvRB8yZ0YcfK",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "3cc717f7-27b9-40f7-ba66-522d4ef32977",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1300,
+        660
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "megaapi",
+        "options": {}
+      },
+      "id": "0f8a4d1b-9789-4024-9e89-2b638bf1b287",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        260,
+        660
+      ],
+      "webhookId": "4d10e98e-9231-4076-a50f-0421cc8e9e74"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Usuário Existe?": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Criar Usuário",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Infos Manuais": {
+      "main": [
+        [
+          {
+            "node": "Usuário existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dify |Criar Conversa + Executa Agente": {
+      "main": [
+        [
+          {
+            "node": "Código - Extrair dados do Streaming1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Condições": {
+      "main": [
+        [
+          {
+            "node": "Infos Manuais",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Usuário existe?": {
+      "main": [
+        [
+          {
+            "node": "Usuário Existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Usuário": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Código - Extrair dados do Streaming1": {
+      "main": [
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase": {
+      "main": [
+        [
+          {
+            "node": "ChamadaAPI - Mega API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Dify |Criar Conversa + Executa Agente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Verificar Condições",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5de70b6e-965d-4717-8535-176d3582c78c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "107b613a2a1a2b2ec55be12aa4987518e4e956275e1d3b131f347428d37ca35c"
+  },
+  "id": "ivqblbeFAtd2dDuH",
+  "tags": []
+}

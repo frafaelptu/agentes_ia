@@ -1,0 +1,83 @@
+{
+  "name": "M3.3 - Webhook - Receber Avisos de Pagamento Asaas",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "pedidos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_cobranca",
+              "condition": "eq",
+              "keyValue": "={{ $json.body.payment.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.body.payment.status }}"
+            }
+          ]
+        }
+      },
+      "id": "3bb092b4-6b10-4dea-a3b1-34d58e45de04",
+      "name": "Atualizar Pagamento Pedido",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1260,
+        400
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "q8fHAvRB8yZ0YcfK",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pagamento-realizado",
+        "options": {}
+      },
+      "id": "b1e68745-b096-478f-8035-6607d7bc0440",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        400
+      ],
+      "webhookId": "4d7e1b81-ed2f-4d27-ad0d-64fdba028bfa"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Pagamento Pedido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "80a3b61e-a47c-45f3-8846-cb9ef552dc79",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "107b613a2a1a2b2ec55be12aa4987518e4e956275e1d3b131f347428d37ca35c"
+  },
+  "id": "b25dS4ynQZe4qPKy",
+  "tags": []
+}

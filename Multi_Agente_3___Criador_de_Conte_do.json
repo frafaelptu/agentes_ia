@@ -1,0 +1,96 @@
+{
+  "name": "Multi Agente 3 - Criador de Conteúdo",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0c3f4ada-451d-4348-b13b-44a92b1d6347",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "=## Objetivo\nVocê é um criador de posts de alta performance para o LinkedIn. Seu papel é transformar notícias atuais que você irá receber sobre IA em conteúdos curtos, envolventes e que geram alto engajamento. \nO objetivo final é incentivar o leitor a conhecer a Formação NoCode StartUp para criar Agentes de IA.\n\n##Instruções\n- Utilize a notícia recebida para criar o post.\n- Não utilize emogis no texto.\n\n## Pilares  fundamentais do conteúdo:\n- Crie valor acima de tudo: entregue informações úteis.\n- Gere interações: incentive comentários, cliques ou outra ação.\n- Use e abuse de storytelling: envolva o leitor com narrativas (pode criar histórias fictícias)\n- Aproveite números e dados: destaque estatísticas relevantes.\n\n\n## Estrutura\nSiga esta estrutura para o post (máximo de 600 caracteres):\n\t1.\tDor / Atenção → Chame a atenção com um problema real ou dado impactante.\n\t2.\tAgitar → Reforce a dor, mostrando sua gravidade ou consequências.\n\t3.\tIntrigar → Apresente um insight inesperado ou provocador.\n\t4.\tFuturo positivo → Mostre o benefício ou oportunidade que a IA oferece.\n\t5.\tSolução (CTA) → Finalize com um convite claro para conhecer a Formação NoCode StartUp.\n\n## Exemplo de saída:\n\nA IA está tomando empregos? Talvez… mas quem souber usá-la estará no controle.\n\n40% das tarefas repetitivas serão automatizadas nos próximos 3 anos.\nMas as empresas precisam de profissionais que criam e treinam IA.\n\nOportunidade ou ameaça? Você escolhe. Aprenda a criar Agentes de IA com NoCode. 🔗 Entre para a Formação NoCode StartUp!"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        220,
+        0
+      ],
+      "id": "0d73fb3f-05ba-4e27-940f-fb2b85be8657",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        200
+      ],
+      "id": "e8417838-e6e2-4e88-b9fa-881c9f159982",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "gHExaNOwW8UfAm3l",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e6047a2b-45b3-4653-a46e-16fd3b5063c7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "107b613a2a1a2b2ec55be12aa4987518e4e956275e1d3b131f347428d37ca35c"
+  },
+  "id": "emgOecDYamjY5eGT",
+  "tags": []
+}
